@@ -9,7 +9,7 @@
 1. Implement pathBlocked() method using the sonar sensor that comes with the mBot
 2. Change the motor pins on line 8 to be the correct pins on the mBot
 3. Change the led_light on line 11 to be the correct LED pin on the mBot
-4. Change line 121 so instead of 10.0 pixels, it is the number of pixels the width of the docked signature should be in order to determine that the robot has been docked.
+4. Change line 118 so instead of 10.0 pixels, it is the number of pixels the width of the docked signature should be in order to determine that the robot has been docked.
 
 ## Resources
 * We used the following sources and modified their code slightly to fit to our project
