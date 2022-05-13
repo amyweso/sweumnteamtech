@@ -87,10 +87,7 @@ void enableBuzzer() {
 
 
 void detectObjects() {
-  static int i = 0;
-  int j;
   uint16_t blocks;
-  char buf[32];
   float left_x;
   float right_x;
 
