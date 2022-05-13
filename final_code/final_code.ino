@@ -7,11 +7,22 @@ Pixy pixy;
 // Arduino pins 5, 6, 7, 8, 9, and 10
 int myPins[6] = {5, 6, 7, 8, 9, 10};
 
-float deadZone = 0.15;
-int baseSpeed = 130; 
-int cont = 0;
-int signature, x, y, width, height;
-float cx, cy, area;
+// initialize the LED pin
+int led_light = 4;
+
+// the dead zone of the PixyCam
+float dead_zone = 0.15;
+
+// true if the robot has docked
+bool docked = false;
+
+// the center of the object we are tracking
+float cx;
+
+// false if sticker has not been 
+// detected, true otherwise
+bool left_detected;
+bool right_detected;
  
 
 // only occurs once when Arduino starts up
@@ -23,6 +34,7 @@ void setup() {
   for (int i = 0; i < 6; i++) {
     pinMode(myPins[i], OUTPUT);
   }
+  pinMode(led_light, OUTPUT);
 }
 
 
@@ -30,56 +42,12 @@ void setup() {
 float mapfloat(long x, long in_min, long in_max, long out_min, long out_max) {
   return (float)(x - in_min) * (out_max - out_min) / (float)(in_max - in_min) + out_min;
 }
-
-
-// returns the center x value of the detected object
-float pixyCheck() {
-  static int i = 0;
-  int j;
-  uint16_t blocks;
-  char buf[32];
-
-  // grab the objects we want to track
-  blocks = pixy.getBlocks();
- 
-  // objects have been detected
-  if (blocks) {
-    // gets basic information about the detected object
-    signature = pixy.blocks[0].signature;
-    height = pixy.blocks[0].height;
-    width = pixy.blocks[0].width;
-
-    // gets the location of the object
-    x = pixy.blocks[0].x;
-    y = pixy.blocks[0].y;
-
-    // gets the center point of the object
-    cx = (x + (width / 2));
-    cy = (y + (height / 2));
-    cx = mapfloat(cx, 0, 320, -1, 1);
-    cy = mapfloat(cy, 0, 200, 1, -1);
-
-    // gets the area of the object
-    area = width * height;
-  }
-
-  // objects have not been detected
-  // continue moving straight
-  else {
-    cont += 1;
-    if (cont == 100) {
-      cont = 0;
-      cx = 0;
-    }
-  }
-  return cx;
-}
  
  
 // moves the robot according to a left and right velocity
 // the velocity can be negative in order to indicate direction
-void moveRobot(int leftSpeed, int rightSpeed) {
-  if (leftSpeed >= 0) {
+void moveRobot(int left_speed, int right_speed) {
+  if (left_speed >= 0) {
     digitalWrite(myPins[1], 0);
     digitalWrite(myPins[2], 1);
   }
@@ -88,7 +56,7 @@ void moveRobot(int leftSpeed, int rightSpeed) {
     digitalWrite(myPins[2], 0);
   }
  
-  if (rightSpeed >= 0) {
+  if (right_speed >= 0) {
     digitalWrite(myPins[3], 0);
     digitalWrite(myPins[4], 1);
   }
@@ -97,8 +65,8 @@ void moveRobot(int leftSpeed, int rightSpeed) {
     digitalWrite(myPins[4], 0);
   }
  
-  analogWrite(myPins[0], abs(leftSpeed));
-  analogWrite(myPins[5], abs(rightSpeed));
+  analogWrite(myPins[0], abs(left_speed));
+  analogWrite(myPins[5], abs(right_speed));
 }
 
 
@@ -118,19 +86,69 @@ void enableBuzzer() {
 }
 
 
+void detectObjects() {
+  uint16_t blocks;
+  float left_x;
+  float right_x;
+
+  // grab the objects we want to track
+  blocks = pixy.getBlocks();
+    
+  for (int i = 0; i < pixy.numBlocks; i++) {
+    // gets the center x coordinate of the detected object
+    int width = pixy.blocks[0].width;
+    int x = pixy.blocks[0].x;
+    cx = (x + (width / 2));
+    cx = mapfloat(cx, 0, 320, -1, 1);
+
+    // get the left sticker target
+    if (pixy.blocks[i].signature == 1) {
+      left_detected = true;
+      left_x = cx;
+    } 
+    
+    // get the right sticker target
+    if (pixy.blocks[i].signature == 2) {
+      right_detected = true;
+      right_x = cx;
+    }
+
+    // get the docked signature
+    if (pixy.blocks[i].signature == 3) {
+      docked = pixy.blocks[i].width < 10.0;
+    }
+  }
+
+  // targets have been detected
+  if (left_detected && right_detected) {
+    digitalWrite(led_light, LOW);
+    cx = (left_x + right_x) / 2;
+  }
+
+  // objects have not been detected
+  // continue moving straight
+  else {
+    digitalWrite(led_light, HIGH);
+    cx = 0.0;
+  }
+}
+
+
 // this loop continuously runs
 // determines the turn and calls moveRobot
 void loop() {
+  detectedObjects();
+  bool blocked = pathBlocked();
+
   // the path is clear
-  if (!pathBlocked()) {
-    float turn = pixyCheck();
-    if (turn > -deadZone && turn < deadZone) {
-      turn = 0;
+  if (!blocked && !docked) {
+    if (cx > -dead_zone && cx < dead_zone) {
+      cx = 0;
     }
-    if (turn < 0) {
+    if (cx < 0) {
       moveRobot(-80, 170);
     }
-    else if (turn > 0) {
+    else if (cx > 0) {
       moveRobot(170, -80);
     }
     else {
@@ -141,7 +159,7 @@ void loop() {
 
   // path is not clear --> enable buzzer
   // and robot stops moving
-  else {
+  else if (blocked) {
       enableBuzzer();
   }
 }
