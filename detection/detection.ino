@@ -1,32 +1,25 @@
-#include <Arduino.h>
-#include <Wire.h>
-#include <SoftwareSerial.h>
-#include <MeMCore.h>
+#include <Pixy2.h>
 
-// Initialize buzzer
-MeBuzzer buzzer;
-
-// Initialize ultrasonic sensor (number indicates 
-// the port that the ultrasonic is connected to)
-MeUltrasonicSensor ultrasonic(3);
+Pixy2 pixy;
 
 void setup() {
-    Serial.begin(9600);
+    Serial.begin(115200);
+    Serial.print("Starting...\n");
+    pixy.init();
 }
 
 void loop() {
-    Serial.print("Distance : ");
-    Serial.print(ultrasonic.distanceCm());
-    Serial.print(" cm");
+    pixy.ccc.getBlocks();
 
-    // there is an object less than 10 cm away
-    if (ultrasonic.distanceCm() < 10) {
-        // sound the buzzer
-        buzzer.tone(262, 500);
-        delay(500);
-
-        // turn buzzer off
-        buzzer.tone(0);
+    // if it detects blocks, print them
+    if (pixy.ccc.numBlocks) {
+        Serial.print("Detected ");
+        Serial.println(pixy.ccc.numBlocks);
+        for (int i = 0; i < pixy.ccc.numBlocks; i++) {
+            Serial.print(" block ");
+            Serial.print(i);
+            Serial.print(": ");
+            pixy.ccc.blocks[i].print();
+        }
     }
-    delay(100);
 }
