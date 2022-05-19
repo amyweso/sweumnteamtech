@@ -6,11 +6,8 @@
 * The third signature is the sticker that determines if the robot has docked
 
 ## To Do List
-1. Change the motor pins to be the correct pins on the mBot - line 18
-2. Plug the ultrasonic sensor into port 3 - line 22
-3. Change the led_light to be the correct LED pin on the mBot - line 25
-4. Come up with the distance for how close an object has to be to the mBot to get the robot to stop - line 90
-5. Change the number of pixels the width of the docked signature should be in order to determine that the robot has been docked - line 132
+3. Come up with the distance for how close an object has to be to the mBot to get the robot to stop - line 90
+4. Change the number of pixels the width of the docked signature should be in order to determine that the robot has been docked - line 123
 
 ## Resources
 * We used the following sources and modified their code slightly to fit to our project
@@ -18,6 +15,7 @@
     * [Example Tracking Video](https://www.youtube.com/watch?v=w_krOCBk1DE)
     * [Buzzer Example Included in Makeblock Library](https://codeload.github.com/Makeblock-official/Makeblock-Libraries/zip/master)
     * [Ultrasonic Sensor Example](https://forum.makeblock.com/t/mbot-arduino-code-that-works-for-the-ultrasonic-sensor/4828)
+    * [Builtin LED Example](https://support.makeblock.com/hc/en-us/articles/1500012866082-Program-mBot-Mega-in-Arduino)
 
 ## Requirements
 * [Makeblock official library](https://codeload.github.com/Makeblock-official/Makeblock-Libraries/zip/master)
