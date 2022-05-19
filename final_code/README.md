@@ -17,6 +17,7 @@
     * [Tracking Example](https://www.computervision.zone/courses/object-following-robot-with-arduino/)
     * [Example Tracking Video](https://www.youtube.com/watch?v=w_krOCBk1DE)
     * [Buzzer Example Included in Makeblock Library](https://codeload.github.com/Makeblock-official/Makeblock-Libraries/zip/master)
+    * [Ultrasonic Sensor Example](https://forum.makeblock.com/t/mbot-arduino-code-that-works-for-the-ultrasonic-sensor/4828)
 
 ## Requirements
 * [Makeblock official library](https://codeload.github.com/Makeblock-official/Makeblock-Libraries/zip/master)
