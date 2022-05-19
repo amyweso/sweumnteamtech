@@ -1,11 +1,25 @@
+// built in libraries
+#include <Arduino.h>
+#include <SoftwareSerial.h>
 #include <SPI.h>
-#include <Pixy.h>
+#include <Wire.h>
+
+// from MakeBlockDrive library
+#include <MeMCore.h>
 #include <MeOrion.h>
+
+// from Pixy2 library
+#include <Pixy.h>
+
 Pixy pixy;
 
 // motor controllers are connected to 
 // Arduino pins 5, 6, 7, 8, 9, and 10
 int myPins[6] = {5, 6, 7, 8, 9, 10};
+
+// Initialize ultrasonic sensor (number indicates 
+// the port that the ultrasonic is connected to)
+MeUltrasonicSensor ultrasonic(3);
 
 // initialize the LED pin
 int led_light = 4;
@@ -73,7 +87,7 @@ void moveRobot(int left_speed, int right_speed) {
 // returns true if the path is blocked by an object
 // returns false if the path is clear
 bool pathBlocked() {
-  return false;
+  return ultrasonic.distanceCm() < 10;
 }
 
 
@@ -137,7 +151,7 @@ void detectObjects() {
 // this loop continuously runs
 // determines the turn and calls moveRobot
 void loop() {
-  detectedObjects();
+  detectObjects();
   bool blocked = pathBlocked();
 
   // the path is clear
