@@ -1,7 +1,6 @@
-#include <Arduino.h>
-#include <Wire.h>
-#include <SoftwareSerial.h>
-#include <MeMCore.h>
+#include <MeBuzzer.h>
+#include <MeUltrasonicSensor.h>
+#include <SPI.h>
 
 // Initialize buzzer
 MeBuzzer buzzer;
