@@ -1,4 +1,5 @@
 #include <Pixy2.h>
+#include <SPI.h>
 
 Pixy2 pixy;
 

@@ -1,5 +1,5 @@
 #include <SPI.h>
-#include <MeOrion.h>
+#include <MeDCMotor.h>
 
 // set up motors
 MeDCMotor left_motor(M1);
