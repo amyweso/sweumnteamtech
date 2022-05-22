@@ -19,7 +19,7 @@ MeDCMotor right_motor(M2);
 
 // Initialize ultrasonic sensor (number indicates 
 // the port that the ultrasonic is connected to)
-MeUltrasonicSensor ultrasonic(3);
+MeUltrasonicSensor ultrasonic(2);
 
 // if the target is in the dead zone
 // have the robot move straight

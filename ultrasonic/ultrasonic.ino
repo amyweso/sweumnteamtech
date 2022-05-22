@@ -8,7 +8,7 @@ MeBuzzer buzzer;
 
 // Initialize ultrasonic sensor (number indicates 
 // the port that the ultrasonic is connected to)
-MeUltrasonicSensor ultrasonic(3);
+MeUltrasonicSensor ultrasonic(2);
 
 void setup() {
     Serial.begin(9600);
