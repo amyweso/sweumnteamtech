@@ -8,7 +8,7 @@
 ## Ports
 * The left motor is connected to port M1
 * The right motor is connected to port M2
-* The ultrasonic sensor is connected to port 3
+* The ultrasonic sensor is connected to port 2
 
 ## Resources
 * We used the following sources and modified their code slightly to fit to our project
