@@ -3,18 +3,32 @@
 
 // from Pixy2 library
 #include <Pixy2.h>
+#include <Pixy2CCC.h>
 
+// initialize Pixy camera
+Pixy2 pixy;
+
+// initialize pins
 int echoPin = 2;
 int trigPin = 3;
-int ledLight = 4;
+int redLight = 4;
+int yellowLight = 5;
+int leftMotor = 9;
+int rightMotor = 10;
 
 // only occurs once when mBot starts up
 void setup() {
   Serial.begin(9600);
   Serial.print("Starting...n");
+  pixy.init();
+
+  // set up I/O pins
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
-  pinMode(ledLight, OUTPUT);
+  pinMode(redLight, OUTPUT);
+  pinMode(yellowLight, OUTPUT);
+  pinMode(leftMotor, OUTPUT);
+  pinMode(rightMotor, OUTPUT);
 }
 
 
@@ -47,7 +61,7 @@ bool pathBlocked() {
   Serial.print(distance);
   Serial.println(" cm");
 
-  return (distance < 40);
+  return (distance < 30);
 }
 
 
@@ -58,9 +72,13 @@ void loop() {
   Serial.println(blocked);
 
   if (blocked) {
-    digitalWrite(ledLight, HIGH);
+    digitalWrite(redLight, HIGH);
+    digitalWrite(leftMotor, LOW);
+    digitalWrite(rightMotor, LOW);
   } else {
-    digitalWrite(ledLight, LOW);
+    digitalWrite(redLight, LOW);
+    digitalWrite(leftMotor, HIGH);
+    digitalWrite(rightMotor, HIGH);
   }
 
   delay(500);

@@ -1,4 +1,4 @@
-# Ultrasonic Example
+# LED Light Example
 
 ## Source
 * This example was taken from this [website](https://www.arduino.cc/en/Tutorial/BuiltInExamples/Blink)
