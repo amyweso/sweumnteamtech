@@ -1,12 +1,6 @@
-// built in library
-#include <SPI.h>
-
-// from Pixy2 library
 #include <Pixy2.h>
 #include <Pixy2CCC.h>
-
-// initialize Pixy camera
-Pixy2 pixy;
+#include <SPI.h>
 
 // initialize pins
 int echoPin = 2;
@@ -16,11 +10,25 @@ int yellowLight = 5;
 int leftMotor = 9;
 int rightMotor = 10;
 
+// the center of the object we are tracking
+float cx = 0;
+
+// false if sticker has not been 
+// detected, true otherwise
+bool leftDetected;
+bool rightDetected;
+
+// initialize Pixy camera
+Pixy2 pixy;
+
+// if the target is in the dead zone
+// have the robot move straight
+float dead_zone = 0.15;
+
 // only occurs once when mBot starts up
 void setup() {
   Serial.begin(9600);
   Serial.print("Starting...n");
-  pixy.init();
 
   // set up I/O pins
   pinMode(trigPin, OUTPUT);
@@ -29,12 +37,20 @@ void setup() {
   pinMode(yellowLight, OUTPUT);
   pinMode(leftMotor, OUTPUT);
   pinMode(rightMotor, OUTPUT);
+  pixy.init();
 }
 
 
 // normalizes a float
 float mapfloat(long x, long in_min, long in_max, long out_min, long out_max) {
   return (float)(x - in_min) * (out_max - out_min) / (float)(in_max - in_min) + out_min;
+}
+
+
+// moves the robot according to a left and right velocity
+void moveRobot(int left_speed, int right_speed) {
+  analogWrite(leftMotor, left_speed);
+  analogWrite(rightMotor, right_speed);
 }
 
 
@@ -61,25 +77,97 @@ bool pathBlocked() {
   Serial.print(distance);
   Serial.println(" cm");
 
-  return (distance < 30);
+  return (distance < 20);
 }
 
+
+void detectObjects() {
+  uint16_t blocks = pixy.ccc.getBlocks();
+  float leftX;
+  float rightX;
+
+  // reset signature detections
+  leftDetected = false;
+  rightDetected = false;
+    
+  for (int i = 0; i < pixy.ccc.numBlocks; i++) {
+    // gets the center x coordinate of the detected object
+    int width = pixy.ccc.blocks[0].m_width;
+    int x = pixy.ccc.blocks[0].m_x;
+    cx = (x + (width / 2));
+    cx = mapfloat(cx, 0, 320, -1, 1);
+
+    // get the left sticker target
+    if (pixy.ccc.blocks[i].m_signature == 1) {
+      leftDetected = true;
+      leftX = cx;
+    } 
+    
+    // get the right sticker target
+    if (pixy.ccc.blocks[i].m_signature == 2) {
+      rightDetected = true;
+      rightX = cx;
+    }
+  }
+
+  // targets have been detected
+  if (leftDetected && rightDetected) {
+    digitalWrite(yellowLight, LOW);
+    cx = (leftX + rightX) / 2;
+  }
+
+  // objects have not been detected
+  // continue moving straight
+  else {
+    digitalWrite(yellowLight, HIGH);
+    cx = 0.0;
+  }
+}
+
+
+// returns true if the robot docked
+// false otherwise
+bool robotDocked() {
+  return !leftDetected && !rightDetected;
+}
 
 // this loop continuously runs
 void loop() {
   bool blocked = pathBlocked();
-  Serial.print("Path is blocked: ");
-  Serial.println(blocked);
+  bool docked = robotDocked();
+  detectObjects();
 
-  if (blocked) {
-    digitalWrite(redLight, HIGH);
-    digitalWrite(leftMotor, LOW);
-    digitalWrite(rightMotor, LOW);
-  } else {
+  // no objects are in the path
+  if (!blocked) {
     digitalWrite(redLight, LOW);
-    digitalWrite(leftMotor, HIGH);
-    digitalWrite(rightMotor, HIGH);
+    if (!docked) {  
+      // object is in the dead zone
+      if (cx > -dead_zone && cx < dead_zone) {
+        cx = 0;
+      }
+  
+      // object is to the left
+      if (cx < 0) {
+        moveRobot(5, 220);
+      }
+  
+      // object is to the right
+      else if (cx > 0) {
+        moveRobot(220, 5);
+      }
+  
+      // object is in the middle
+      else {
+        moveRobot(200, 200);
+      }
+    } 
+  }
+  
+  // objects are in the path
+  else {
+    digitalWrite(redLight, HIGH);
+    moveRobot(0, 0);
   }
 
-  delay(500);
+  delay(100);
 }
